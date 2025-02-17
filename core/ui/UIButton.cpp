@@ -177,6 +177,7 @@ void Button::setTitleLabel(Label* label)
 
         addProtectedChild(_titleRenderer, TITLE_RENDERER_Z, -1);
         updateTitleLocation();
+        updateContentSize();
     }
 }
 
