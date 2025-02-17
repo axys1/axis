@@ -135,7 +135,6 @@ void FastTMXLayer::draw(Renderer* renderer, const Mat4& transform, uint32_t flag
     updateTotalQuads();
 
     auto cam = Camera::getVisitingCamera();
-    auto proj = Director::getInstance()->getProjection();
     if (flags != 0 || _dirty || _quadsDirty)
     {
         Vec2 s             = _director->getVisibleSize();
