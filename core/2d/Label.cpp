@@ -1760,25 +1760,26 @@ void Label::updateContent()
             float nextTokenY        = _letterOffsetY;
             auto contentScaleFactor = AX_CONTENT_SCALE_FACTOR();
             float lineSpacing       = _lineSpacing * contentScaleFactor;
+            float lineHeight        = _lineHeight * _fontScale / contentScaleFactor;
 
             // atlas font
             for (int i = 0; i < _numberOfLines; ++i)
             {
                 if (_strikethroughEnabled)
                 {
-                    auto y = nextTokenY / contentScaleFactor - _lineHeight * _fontScale / 2;
+                    auto y = nextTokenY - lineHeight / 2;
                     _lineDrawNode->drawLine(Vec2(_linesOffsetX[i], y), Vec2(_linesWidth[i] + _linesOffsetX[i], y),
                                             Color4F(lineColor), thickness);
                 }
 
                 if (_underlineEnabled)
                 {
-                    auto y = (nextTokenY * _fontScale) / contentScaleFactor - _lineHeight * _fontScale;
+                    auto y = nextTokenY - lineHeight;
                     _lineDrawNode->drawLine(Vec2(_linesOffsetX[i], y), Vec2(_linesWidth[i] + _linesOffsetX[i], y),
                                             Color4F(lineColor), thickness);
                 }
 
-                nextTokenY -= _lineHeight * _fontScale + lineSpacing;
+                nextTokenY -= lineHeight + lineSpacing;
             }
         }
         else if (_textSprite) // ...and is the logic for System fonts
