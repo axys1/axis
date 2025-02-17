@@ -135,16 +135,14 @@ void FastTMXLayer::draw(Renderer* renderer, const Mat4& transform, uint32_t flag
     updateTotalQuads();
 
     auto cam = Camera::getVisitingCamera();
-    if (flags != 0 || _dirty || _quadsDirty || !_cameraPositionDirty.fuzzyEquals(cam->getPosition(), _tileSet->_tileSize.x) ||
-        _cameraZoomDirty != cam->getZoom())
+    auto proj = Director::getInstance()->getProjection();
+    if (flags != 0 || _dirty || _quadsDirty)
     {
-        _cameraPositionDirty = cam->getPosition();
-        auto zoom            = _cameraZoomDirty = cam->getZoom();
-        Vec2 s               = _director->getVisibleSize();
-        const Vec2& anchor   = getAnchorPoint();
-        auto rect            = Rect(cam->getPositionX() - getPositionX() - s.width * zoom * 0.5,
-                                    cam->getPositionY() - getPositionY() - s.height * zoom * 0.5,
-                                    s.width * zoom, s.height * zoom);
+        Vec2 s             = _director->getVisibleSize();
+        const Vec2& anchor = getAnchorPoint();
+        auto rect = Rect(Camera::getVisitingCamera()->getPositionX() - s.width * (anchor.x == 0.0f ? 0.5f : anchor.x),
+                         Camera::getVisitingCamera()->getPositionY() - s.height * (anchor.y == 0.0f ? 0.5f : anchor.y),
+                         s.width, s.height);
 
         Mat4 inv = transform;
         inv.inverse();
