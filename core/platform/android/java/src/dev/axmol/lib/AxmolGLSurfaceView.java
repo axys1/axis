@@ -64,6 +64,7 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
 
     private boolean mSoftKeyboardShown = false;
     private boolean mMultipleTouchEnabled = true;
+    private boolean mInteractionsEnabled = true;
 
     private CountDownLatch mNativePauseComplete;
 
@@ -81,6 +82,14 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
 
     public void setMultipleTouchEnabled(boolean multipleTouchEnabled) {
         this.mMultipleTouchEnabled = multipleTouchEnabled;
+    }
+
+    public boolean areInteractionsEnabled() {
+        return mInteractionsEnabled;
+    }
+
+    public void setInteractionsEnabled(boolean interactionsEnabled) {
+        this.mInteractionsEnabled = interactionsEnabled;
     }
 
     // ===========================================================
@@ -214,6 +223,10 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
 
         switch (pMotionEvent.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_POINTER_DOWN:
+                if (!mInteractionsEnabled) {
+                    break;
+                }
+
                 final int indexPointerDown = pMotionEvent.getAction() >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
                 if (!mMultipleTouchEnabled && indexPointerDown != 0) {
                     break;
@@ -231,6 +244,10 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
                 break;
 
             case MotionEvent.ACTION_DOWN:
+                if (!mInteractionsEnabled) {
+                    break;
+                }
+                
                 // there are only one finger on the screen
                 final int idDown = pMotionEvent.getPointerId(0);
                 final float xDown = xs[0];
@@ -351,6 +368,10 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
 
     @Override
     public boolean onKeyDown(final int pKeyCode, final KeyEvent pKeyEvent) {
+        if (!mInteractionsEnabled) {
+            return false;
+        }
+
         switch (pKeyCode) {
             case KeyEvent.KEYCODE_BACK:
             case KeyEvent.KEYCODE_MENU:
@@ -375,6 +396,10 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
 
     @Override
     public boolean onKeyUp(final int keyCode, KeyEvent event) {
+        if (!mInteractionsEnabled) {
+            return false;
+        }
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
             case KeyEvent.KEYCODE_MENU:
