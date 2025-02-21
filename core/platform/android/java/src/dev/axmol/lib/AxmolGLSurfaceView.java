@@ -64,7 +64,7 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
 
     private boolean mSoftKeyboardShown = false;
     private boolean mMultipleTouchEnabled = true;
-    private boolean mInteractiveEnabled = true;
+    private boolean mInteractive = true;
 
     private CountDownLatch mNativePauseComplete;
 
@@ -84,12 +84,12 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
         this.mMultipleTouchEnabled = multipleTouchEnabled;
     }
 
-    public boolean isInteractiveEnabled() {
-        return mInteractiveEnabled;
+    public boolean isInteractive() {
+        return mInteractive;
     }
 
-    public void setInteractiveEnabled(boolean interactiveEnabled) {
-        this.mInteractiveEnabled = interactiveEnabled;
+    public void setInteractive(boolean interactive) {
+        this.mInteractive = interactive;
     }
 
     // ===========================================================
@@ -223,7 +223,7 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
 
         switch (pMotionEvent.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_POINTER_DOWN:
-                if (!mInteractiveEnabled) {
+                if (!mInteractive) {
                     break;
                 }
 
@@ -244,7 +244,7 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
                 break;
 
             case MotionEvent.ACTION_DOWN:
-                if (!mInteractiveEnabled) {
+                if (!mInteractive) {
                     break;
                 }
                 
@@ -368,7 +368,7 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
 
     @Override
     public boolean onKeyDown(final int pKeyCode, final KeyEvent pKeyEvent) {
-        if (!mInteractiveEnabled) {
+        if (!mInteractive) {
             return false;
         }
 
@@ -396,7 +396,7 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
 
     @Override
     public boolean onKeyUp(final int keyCode, KeyEvent event) {
-        if (!mInteractiveEnabled) {
+        if (!mInteractive) {
             return false;
         }
 
