@@ -84,7 +84,7 @@ public class AxmolGLSurfaceView extends GLSurfaceView {
         this.mMultipleTouchEnabled = multipleTouchEnabled;
     }
 
-    public boolean areInteractionsEnabled() {
+    public boolean isInteractionsEnabled() {
         return mInteractionsEnabled;
     }
 
