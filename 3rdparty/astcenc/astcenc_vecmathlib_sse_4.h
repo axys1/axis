@@ -622,22 +622,6 @@ ASTCENC_SIMD_INLINE vint4 hmax(vint4 a)
 }
 
 /**
- * @brief Return the horizontal sum of a vector as a scalar.
- */
-ASTCENC_SIMD_INLINE int hadd_s(vint4 a)
-{
-	// Add top and bottom halves, lane 1/0
-	__m128i fold = _mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(a.m),
-	                                              _mm_castsi128_ps(a.m)));
-	__m128i t = _mm_add_epi32(a.m, fold);
-
-	// Add top and bottom halves, lane 0 (_mm_hadd_ps exists but slow)
-	t = _mm_add_epi32(t, _mm_shuffle_epi32(t, 0x55));
-
-	return _mm_cvtsi128_si32(t);
-}
-
-/**
  * @brief Store a vector to a 16B aligned memory address.
  */
 ASTCENC_SIMD_INLINE void storea(vint4 a, int* p)

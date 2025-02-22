@@ -583,15 +583,6 @@ ASTCENC_SIMD_INLINE vint4 hmax(vint4 a)
 }
 
 /**
- * @brief Return the horizontal sum of a vector.
- */
-ASTCENC_SIMD_INLINE int hadd_s(vint4 a)
-{
-	int32x2_t t = vadd_s32(vget_high_s32(a.m), vget_low_s32(a.m));
-	return vget_lane_s32(vpadd_s32(t, t), 0);
-}
-
-/**
  * @brief Store a vector to a 16B aligned memory address.
  */
 ASTCENC_SIMD_INLINE void storea(vint4 a, int* p)

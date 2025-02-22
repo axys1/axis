@@ -647,14 +647,6 @@ ASTCENC_SIMD_INLINE vint4 hmax(vint4 a)
 }
 
 /**
- * @brief Return the horizontal sum of vector lanes as a scalar.
- */
-ASTCENC_SIMD_INLINE int hadd_s(vint4 a)
-{
-	return a.m[0] + a.m[1] + a.m[2] + a.m[3];
-}
-
-/**
  * @brief Store a vector to an aligned memory address.
  */
 ASTCENC_SIMD_INLINE void storea(vint4 a, int* p)
