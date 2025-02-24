@@ -285,7 +285,7 @@ void Box2DTest::update(float dt)
 
     // The number of sub-steps, increasing the sub-step count can increase accuracy. Typically 4.
     constexpr int subStepCount = 4;
-    b2World_Step(world, _director->getAnimationInterval(), subStepCount);
+    b2World_Step(world, dt, subStepCount);
 }
 
 void Box2DTest::onTouchesEnded(const std::vector<Touch*>& touches, Event* event)
