@@ -68,7 +68,7 @@ AX_API void setLogOutput(ILogOutput* output)
     s_logOutput = output;
 }
 
-AX_API LogItem& preprocessLog(LogItem&& item)
+AX_API LogItem&& preprocessLog(LogItem&& item)
 {
     if (s_logFmtFlags != LogFmtFlag::Null)
     {
@@ -147,8 +147,7 @@ AX_API LogItem& preprocessLog(LogItem&& item)
             prefix_size += fmt::format_to_n(wptr + prefix_size, buffer_size - prefix_size,
                                             "[{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}.{:03d}]", ts.tm_year + 1900,
                                             ts.tm_mon + 1, ts.tm_mday, ts.tm_hour, ts.tm_min, ts.tm_sec,
-                                            static_cast<int>(tv_msec % std::milli::den))
-                               .size;
+                                            static_cast<int>(tv_msec % std::milli::den)).size;
         }
         if (bitmask::any(s_logFmtFlags, LogFmtFlag::ProcessId))
             prefix_size +=
@@ -157,13 +156,15 @@ AX_API LogItem& preprocessLog(LogItem&& item)
             prefix_size +=
                 fmt::format_to_n(wptr + prefix_size, buffer_size - prefix_size, "[TID:{:x}]", xmol_gettid()).size;
     }
-    return item;
+    return std::forward<LogItem>(item);
 }
 
-AX_DLL void outputLog(LogItem& item, const char* tag)
+AX_DLL void outputLog(LogItem&& item, const char* tag)
 {
-    if (!s_logOutput) writeLog(item, tag);
-    else s_logOutput->write(item, tag);
+    if (!s_logOutput)
+        writeLog(item, tag);
+    else
+        s_logOutput->write(item, tag);
 }
 
 AX_DLL void writeLog(LogItem& item, const char* tag)
@@ -210,7 +211,7 @@ AX_DLL void writeLog(LogItem& item, const char* tag)
         OutputDebugStringW(ntcvt::from_chars(item.message()).c_str());
 #    endif
 
-        // write normal color text to console
+    // write normal color text to console
 #    if defined(_WIN32)
     auto hStdout = ::GetStdHandle(item.level_ != LogLevel::Error ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
     if (hStdout)
@@ -244,4 +245,4 @@ AX_API void print(const char* format, ...)
                   "axmol debug info");
 }
 #endif
-}
+}  // namespace ax
