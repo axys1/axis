@@ -64,6 +64,8 @@ if (CMAKE_CXX_STANDARD GREATER_EQUAL ${_AX_MIN_CXX_STD})
 else()
     message(STATUS "Building axmol require c++ std >= ${_AX_MIN_CXX_STD}")
 endif()
+
+# used to set 3rdparty c++ standard same with axmol
 set(_AX_CXX_STD ${CMAKE_CXX_STANDARD} CACHE STRING "" FORCE)
 
 if(NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED)
