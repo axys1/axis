@@ -57,7 +57,7 @@ AX_ENABLE_BITMASK_OPS(LogFmtFlag);
 
 class LogItem
 {
-    friend AX_API LogItem& preprocessLog(LogItem&& logItem);
+    friend AX_API LogItem&& preprocessLog(LogItem&& logItem);
     friend AX_API void writeLog(LogItem& item, const char* tag);
 
 public:
@@ -77,7 +77,7 @@ public:
     }
 
     template <typename _FmtType, typename... _Types>
-    inline static LogItem& vformat(_FmtType&& fmt, LogItem& item, _Types&&... args)
+    inline static LogItem&& vformat(_FmtType&& fmt, LogItem&& item, _Types&&... args)
     {
         item.qualified_message_ =
             fmt::format(std::forward<_FmtType>(fmt), std::string_view{item.prefix_buffer_, item.prefix_size_},
@@ -89,7 +89,7 @@ public:
         if (item.has_style_)
             item.qualified_message_.append("\x1b[m"sv);
         item.qualifier_size_ += (item.qualified_message_.size() - old_size);
-        return item;
+        return std::forward<LogItem>(item);
     }
 
 private:
@@ -124,17 +124,19 @@ AX_API void setLogFmtFlag(LogFmtFlag flags);
 AX_API void setLogOutput(ILogOutput* output);
 
 /* @brief internal use */
-AX_API LogItem& preprocessLog(LogItem&& logItem);
+AX_API LogItem&& preprocessLog(LogItem&& logItem);
 
 /* @brief internal use */
-AX_API void outputLog(LogItem& item, const char* tag);
+AX_API void outputLog(LogItem&& item, const char* tag);
 AX_API void writeLog(LogItem& item, const char* tag);
 
 template <typename _FmtType, typename... _Types>
-inline void printLogT(_FmtType&& fmt, LogItem& item, _Types&&... args)
+inline void printLogT(_FmtType&& fmt, LogItem&& item, _Types&&... args)
 {
     if (item.level() >= getLogLevel())
-        outputLog(LogItem::vformat(std::forward<_FmtType>(fmt), item, std::forward<_Types>(args)...), "axmol");
+        outputLog(
+            LogItem::vformat(std::forward<_FmtType>(fmt), std::forward<LogItem>(item), std::forward<_Types>(args)...),
+            "axmol");
 }
 
 #define AXLOG_WITH_LEVEL(level, fmtOrMsg, ...) \
@@ -158,7 +160,7 @@ inline void printLogT(_FmtType&& fmt, LogItem& item, _Types&&... args)
 #define AXLOGW(fmtOrMsg, ...) AXLOG_WITH_LEVEL(ax::LogLevel::Warn, fmtOrMsg, ##__VA_ARGS__)
 #define AXLOGE(fmtOrMsg, ...) AXLOG_WITH_LEVEL(ax::LogLevel::Error, fmtOrMsg, ##__VA_ARGS__)
 
-#define AXLOGT AXLOGV
+#define AXLOGT                AXLOGV
 
 #ifndef AX_CORE_PROFILE
 /**
@@ -166,4 +168,4 @@ inline void printLogT(_FmtType&& fmt, LogItem& item, _Types&&... args)
  */
 /* AX_DEPRECATED(2.1)*/ AX_API void print(const char* format, ...) AX_FORMAT_PRINTF(1, 2);  // use AXLOGD instead
 #endif
-}
+}  // namespace ax
