@@ -42,7 +42,6 @@
 #include "ui/UIHelper.h"
 
 #include "fmt/compile.h"
-#include <fmt/format.h>
 
 #include "platform/SAXParser.h"
 
