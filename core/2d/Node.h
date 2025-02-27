@@ -28,8 +28,8 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __CCNODE_H__
-#define __CCNODE_H__
+#ifndef __AXNODE_H__
+#define __AXNODE_H__
 
 #include <cstdint>
 #include "base/Macros.h"

@@ -24,8 +24,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __CCPHYSICS_WORLD_H__
-#define __CCPHYSICS_WORLD_H__
+#pragma once
 
 #include "base/Config.h"
 #if defined(AX_ENABLE_PHYSICS)
@@ -42,7 +41,7 @@ namespace ax
 
 class PhysicsBody;
 class PhysicsJoint;
-class PhysicsShape;
+class PhysicsCollider;
 class PhysicsContact;
 
 class Director;
@@ -57,7 +56,7 @@ class PhysicsWorld;
 
 typedef struct PhysicsRayCastInfo
 {
-    PhysicsShape* shape;
+    PhysicsCollider* shape;
     Vec2 start;
     Vec2 end;  ///< in lua, it's name is "ended"
     Vec2 contact;
@@ -84,7 +83,7 @@ typedef struct PhysicsRayCastInfo
  * @return true to continue, false to terminate
  */
 typedef std::function<bool(PhysicsWorld& world, const PhysicsRayCastInfo& info, void* data)> PhysicsRayCastCallbackFunc;
-typedef std::function<bool(PhysicsWorld&, PhysicsShape&, void*)> PhysicsQueryRectCallbackFunc;
+typedef std::function<bool(PhysicsWorld&, PhysicsCollider&, void*)> PhysicsQueryRectCallbackFunc;
 typedef PhysicsQueryRectCallbackFunc PhysicsQueryPointCallbackFunc;
 
 /**
@@ -109,6 +108,8 @@ public:
     static const int DEBUGDRAW_ALL;      ///< draw all
 
 public:
+    b2WorldId getB2World() const { return _b2World; }
+
     /**
      * Adds a joint to this physics world.
      *
@@ -196,21 +197,21 @@ public:
     /**
      * Get physics shapes that contains the point.
      *
-     * All shapes contains the point will be pushed in a Vector<PhysicsShape*> object.
+     * All shapes contains the point will be pushed in a Vector<PhysicsCollider*> object.
      * @attention The point must lie inside a shape.
      * @param   point   A Vec2 object contains the position of the point.
-     * @return A Vector<PhysicsShape*> object contains all found PhysicsShape pointer.
+     * @return A Vector<PhysicsCollider*> object contains all found PhysicsCollider pointer.
      */
-    Vector<PhysicsShape*> getShapes(const Vec2& point) const;
+    Vector<PhysicsCollider*> getShapes(const Vec2& point) const;
 
     /**
      * Get the nearest physics shape that contains the point.
      *
      * Query this physics world at point and return the closest shape.
      * @param   point   A Vec2 object contains the position of the point.
-     * @return A PhysicsShape object pointer or nullptr if no shapes were found
+     * @return A PhysicsCollider object pointer or nullptr if no shapes were found
      */
-    PhysicsShape* getShape(const Vec2& point) const;
+    PhysicsCollider* getShape(const Vec2& point) const;
 
     /**
      * Get all the bodies that in this physics world.
@@ -252,8 +253,11 @@ public:
     /**
      * set the slop and bias value of this physics world.
      *
-     * @param slop Amount of encouraged penetration between colliding shapes. Used to reduce oscillating contacts and keep the collision cache warm.
-     * @param bias Determines how fast overlapping shapes are pushed apart. Expressed as a fraction of the error remaining after each second. Defaults to pow(1.0 - 0.1, 60.0) meaning that Chipmunk fixes 10% of overlap each frame at 60Hz.
+     * @param slop Amount of encouraged penetration between colliding shapes. Used to reduce oscillating contacts and
+     * keep the collision cache warm.
+     * @param bias Determines how fast overlapping shapes are pushed apart. Expressed as a fraction of the error
+     * remaining after each second. Defaults to pow(1.0 - 0.1, 60.0) meaning that Chipmunk fixes 10% of overlap each
+     * frame at 60Hz.
      */
     void setSlopBias(float slop, float bias);
 
@@ -342,14 +346,6 @@ public:
     /** get the number of substeps */
     int getFixedUpdateRate() const { return _fixedRate; }
 
-    /**
-     * Set the debug draw mask of this physics world.
-     *
-     * This physics world will draw shapes and joints by DrawNode according to mask.
-     * @param mask Mask has four value:DEBUGDRAW_NONE, DEBUGDRAW_SHAPE, DEBUGDRAW_JOINT, DEBUGDRAW_CONTACT and
-     * DEBUGDRAW_ALL, default is DEBUGDRAW_NONE
-     */
-    void setDebugDrawMask(int mask);
 
     /**
      * set the callback which invoked before update of each object in physics world.
@@ -360,20 +356,6 @@ public:
      * set the callback which invoked after update of each object in physics world.
      */
     void setPostUpdateCallback(const std::function<void()>& callback);
-
-    /**
-     * Get the debug draw mask.
-     *
-     * @return An integer number.
-     */
-    int getDebugDrawMask() const { return _debugDrawMask; }
-
-    /**
-     * Get the debug draw node
-     *
-     * @return Pointer to draw node, which may be nullptr
-     */
-    DrawNode* getDebugDraw() const { return _debugDraw; }
 
     /**
      * To control the step of physics.
@@ -407,18 +389,14 @@ protected:
     bool init();
 
     virtual void addBody(PhysicsBody* body);
-    virtual void addShape(PhysicsShape* shape);
-    virtual void removeShape(PhysicsShape* shape);
-    virtual void update(float delta, bool userCall = false);
 
-    virtual void debugDraw();
+    virtual void update(float delta, bool userCall = false);
 
     virtual bool collisionBeginCallback(PhysicsContact& contact);
     virtual bool collisionPreSolveCallback(PhysicsContact& contact);
     virtual void collisionPostSolveCallback(PhysicsContact& contact);
     virtual void collisionSeparateCallback(PhysicsContact& contact);
 
-    virtual void doAddBody(PhysicsBody* body);
     virtual void doRemoveBody(PhysicsBody* body);
     virtual void doRemoveJoint(PhysicsJoint* joint);
     virtual void addBodyOrDelay(PhysicsBody* body);
@@ -428,13 +406,15 @@ protected:
 
 protected:
     Vec2 _gravity;
+    float _PTMRatio;
     float _speed;
     int _updateRate;
     int _updateRateCount;
     float _updateTime;
     int _substeps;
     int _fixedRate;
-    cpSpace* _cpSpace;
+    b2WorldId _b2World;
+    bool _isWorldLocked = false;
 
     bool _updateBodyTransform;
     Vector<PhysicsBody*> _bodies;
@@ -442,8 +422,6 @@ protected:
     Scene* _scene;
 
     bool _autoStep;
-    DrawNode* _debugDraw;
-    int _debugDrawMask;
 
     EventDispatcher* _eventDispatcher;
 
@@ -471,7 +449,7 @@ protected:
     friend class Scene;
     friend class Director;
     friend class PhysicsBody;
-    friend class PhysicsShape;
+    friend class PhysicsCollider;
     friend class PhysicsJoint;
     friend class PhysicsWorldCallback;
     friend class PhysicsDebugDraw;
@@ -482,7 +460,6 @@ extern const float AX_DLL PHYSICS_INFINITY;
 /** @} */
 /** @} */
 
-}
+}  // namespace ax
 
 #endif  // defined(AX_ENABLE_PHYSICS)
-#endif  // __CCPHYSICS_WORLD_H__

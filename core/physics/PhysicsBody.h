@@ -24,18 +24,15 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __CCPHYSICS_BODY_H__
-#define __CCPHYSICS_BODY_H__
+#pragma once
 
 #include "base/Config.h"
 #if defined(AX_ENABLE_PHYSICS)
 
 #    include "2d/Component.h"
 #    include "math/Math.h"
-#    include "physics/PhysicsShape.h"
+#    include "physics/PhysicsCollider.h"
 #    include "base/Vector.h"
-
-struct cpBody;
 
 namespace ax
 {
@@ -56,7 +53,7 @@ const PhysicsMaterial PHYSICSBODY_MATERIAL_DEFAULT(0.1f, 0.5f, 0.5f);
 /**
  * A body affect by physics.
  *
- * It can attach one or more shapes.
+ * It can attach one or more colliders.
  * If you create body with createXXX, it will automatically compute mass and moment with density your specified(which is
  * PHYSICSBODY_MATERIAL_DEFAULT by default, and the density value is 0.1f), and it based on the formula: mass = density
  * * area. If you create body with createEdgeXXX, the mass and moment will be PHYSICS_INFINITY by default. And it's a
@@ -69,30 +66,12 @@ public:
     const static std::string COMPONENT_NAME;
 
     /**
-     * Create a body with default mass and moment.
+     * Create a rigibody.
      *
-     * This default mass value is 1.0.
-     * This default moment value is 200.
+     * The mass and moment automaticall computed by box2d internal
      * @return  An autoreleased PhysicsBody object pointer.
      */
     static PhysicsBody* create();
-
-    /**
-     * Create a body with mass and default moment.
-     *
-     * @param mass This body's mass.
-     * @return  An autoreleased PhysicsBody object pointer.
-     */
-    static PhysicsBody* create(float mass);
-
-    /**
-     * Create a body with mass and moment.
-     *
-     * @param mass This body's mass.
-     * @param moment This body's moment.
-     * @return  An autoreleased PhysicsBody object pointer.
-     */
-    static PhysicsBody* create(float mass, float moment);
 
     /**
      * Create a body contains a circle.
@@ -106,7 +85,7 @@ public:
                                      const PhysicsMaterial& material = PHYSICSBODY_MATERIAL_DEFAULT,
                                      const Vec2& offset              = Vec2::ZERO);
     /**
-     * Create a body contains a box shape.
+     * Create a body contains a box collider.
      *
      * @param   size Size contains this box's width and height.
      * @param   material A PhysicsMaterial object, the default value is PHYSICSSHAPE_MATERIAL_DEFAULT.
@@ -118,7 +97,7 @@ public:
                                   const Vec2& offset              = Vec2::ZERO);
 
     /**
-     * @brief Create a body contains a polygon shape.
+     * @brief Create a body contains a polygon collider.
      *
      * @param   points Points is an array of Vec2 structs defining a convex hull with a clockwise winding.
      * @param   count An integer number, contains the count of the points array.
@@ -132,7 +111,7 @@ public:
                                       const Vec2& offset              = Vec2::ZERO);
 
     /**
-     * Create a body contains a EdgeSegment shape.
+     * Create a body contains a EdgeSegment collider.
      *
      * @param   a It's the edge's begin position.
      * @param   b It's the edge's end position.
@@ -146,7 +125,7 @@ public:
                                           float border                    = 1);
 
     /**
-     * Create a body contains a EdgeBox shape.
+     * Create a body contains a EdgeBox collider.
      * @param   size The size contains this box's width and height.
      * @param   material A PhysicsMaterial object, the default value is PHYSICSSHAPE_MATERIAL_DEFAULT.
      * @param   border It's a edge's border width.
@@ -159,7 +138,7 @@ public:
                                       const Vec2& offset              = Vec2::ZERO);
 
     /**
-     * Create a body contains a EdgePolygon shape.
+     * Create a body contains a EdgePolygon collider.
      *
      * @param   points Points is an array of Vec2 structs defining a convex hull with a clockwise winding.
      * @param   count An integer number, contains the count of the points array.
@@ -173,7 +152,7 @@ public:
                                           float border                    = 1);
 
     /**
-     * Create a body contains a EdgeChain shape.
+     * Create a body contains a EdgeChain collider.
      *
      * @param   points A Vec2 object pointer, it contains an array of points.
      * @param   count An integer number, contains the count of the points array.
@@ -187,58 +166,58 @@ public:
                                         float border                    = 1);
 
     /**
-     * @brief Add a shape to body.
-     * @param shape The shape to be added.
-     * @param addMassAndMoment If this is true, the shape's mass and moment will be added to body. The default is true.
-     * @return This shape's pointer if added success or nullptr if failed.
+     * @brief Add a collider to body.
+     * @param collider The collider to be added.
+     * @param addMassAndMoment If this is true, the collider's mass and moment will be added to body. The default is true.
+     * @return This collider's pointer if added success or nullptr if failed.
      */
-    virtual PhysicsShape* addShape(PhysicsShape* shape, bool addMassAndMoment = true);
+    virtual PhysicsCollider* addCollider(PhysicsCollider* collider, bool addMassAndMoment = true);
 
     /**
-     * @brief Remove a shape from body.
-     * @param shape Shape the shape to be removed.
-     * @param reduceMassAndMoment If this is true, the body mass and moment will be reduced by shape. The default is
+     * @brief Remove a collider from body.
+     * @param collider the collider to be removed.
+     * @param reduceMassAndMoment If this is true, the body mass and moment will be reduced by collider. The default is
      * true.
      */
-    void removeShape(PhysicsShape* shape, bool reduceMassAndMoment = true);
+    void removeCollider(PhysicsCollider* collider, bool reduceMassAndMoment = true);
 
     /**
-     * @brief Remove a shape from body.
-     * @param tag The tag of the shape to be removed.
-     * @param reduceMassAndMoment If this is true, the body mass and moment will be reduced by shape. The default is
+     * @brief Remove a collider from body.
+     * @param tag The tag of the collider to be removed.
+     * @param reduceMassAndMoment If this is true, the body mass and moment will be reduced by collider. The default is
      * true.
      */
-    void removeShape(int tag, bool reduceMassAndMoment = true);
+    void removeCollider(int tag, bool reduceMassAndMoment = true);
 
     /**
-     * Remove all shapes.
+     * Remove all colliders.
      *
-     * @param reduceMassAndMoment If this is true, the body mass and moment will be reduced by shape. The default is
+     * @param reduceMassAndMoment If this is true, the body mass and moment will be reduced by collider. The default is
      * true.
      */
-    void removeAllShapes(bool reduceMassAndMoment = true);
+    void removeAllColliders(bool reduceMassAndMoment = true);
 
     /**
-     * Get the body shapes.
+     * Get the body colliders.
      *
-     * @return A Vector<PhysicsShape*> object contains PhysicsShape pointer.
+     * @return A Vector<PhysicsCollider*> object contains PhysicsCollider pointer.
      */
-    const Vector<PhysicsShape*>& getShapes() const { return _shapes; }
+    const Vector<PhysicsCollider*>& getColliders() const { return _colliders; }
 
     /**
-     * Get the first shape of the body shapes.
+     * Get the first collider of the body colliders.
      *
-     * @return The first shape in this body.
+     * @return The first collider in this body.
      */
-    PhysicsShape* getFirstShape() const { return _shapes.size() >= 1 ? _shapes.at(0) : nullptr; }
+    PhysicsCollider* getFirstCollider() const { return _colliders.size() >= 1 ? _colliders.at(0) : nullptr; }
 
     /**
-     * get the shape of the body.
+     * get the collider of the body.
      *
-     * @param   tag   An integer number that identifies a PhysicsShape object.
-     * @return A PhysicsShape object pointer or nullptr if no shapes were found.
+     * @param   tag   An integer number that identifies a PhysicsCollider object.
+     * @return A PhysicsCollider object pointer or nullptr if no colliders were found.
      */
-    PhysicsShape* getShape(int tag) const;
+    PhysicsCollider* getCollider(int tag) const;
 
     /**
      * Applies a continuous force to body.
@@ -353,23 +332,23 @@ public:
     void setCollisionBitmask(int bitmask);
 
     /**
-     * Return bitmask of first shape.
+     * Return bitmask of first collider.
      *
-     * @return If there is no shape in body, return default value.(0xFFFFFFFF)
+     * @return If there is no collider in body, return default value.(0xFFFFFFFF)
      */
     int getCategoryBitmask() const;
 
     /**
-     * Return bitmask of first shape.
+     * Return bitmask of first collider.
      *
-     * @return If there is no shape in body, return default value.(0x00000000)
+     * @return If there is no collider in body, return default value.(0x00000000)
      */
     int getContactTestBitmask() const;
 
     /**
-     * Return bitmask of first shape.
+     * Return bitmask of first collider.
      *
-     * @return If there is no shape in body, return default value.(0xFFFFFFFF)
+     * @return If there is no collider in body, return default value.(0xFFFFFFFF)
      */
     int getCollisionBitmask() const;
 
@@ -382,9 +361,9 @@ public:
     void setGroup(int group);
 
     /**
-     * Return group of first shape.
+     * Return group of first collider.
      *
-     * @return If there is no shape in body, return default value.(0)
+     * @return If there is no collider in body, return default value.(0)
      */
     int getGroup() const;
 
@@ -419,49 +398,11 @@ public:
      */
     void setDynamic(bool dynamic);
 
-    /**
-     * @brief Set the body mass.
-     *
-     * @attention If you need add/subtract mass to body, don't use setMass(getMass() +/- mass), because the mass of body
-     * may be equal to PHYSICS_INFINITY, it will cause some unexpected result, please use addMass() instead.
-     */
-    void setMass(float mass);
-
     /** Get the body mass. */
-    float getMass() const { return _mass; }
-
-    /**
-     * @brief Add mass to body.
-     *
-     * @param mass If _mass(mass of the body) == PHYSICS_INFINITY, it remains.
-     * if mass == PHYSICS_INFINITY, _mass will be PHYSICS_INFINITY.
-     * if mass == -PHYSICS_INFINITY, _mass will not change.
-     * if mass + _mass <= 0, _mass will equal to MASS_DEFAULT(1.0)
-     * other wise, mass = mass + _mass;
-     */
-    void addMass(float mass);
-
-    /**
-     * @brief Set the body moment of inertia.
-     *
-     * @note If you need add/subtract moment to body, don't use setMoment(getMoment() +/- moment), because the moment of
-     * body may be equal to PHYSICS_INFINITY, it will cause some unexpected result, please use addMoment() instead.
-     */
-    void setMoment(float moment);
+    float getMass() const;
 
     /** Get the body moment of inertia. */
-    float getMoment() const { return _moment; }
-
-    /**
-     * @brief Add moment of inertia to body.
-     *
-     * @param moment If _moment(moment of the body) == PHYSICS_INFINITY, it remains.
-     * if moment == PHYSICS_INFINITY, _moment will be PHYSICS_INFINITY.
-     * if moment == -PHYSICS_INFINITY, _moment will not change.
-     * if moment + _moment <= 0, _moment will equal to MASS_DEFAULT(1.0)
-     * other wise, moment = moment + _moment;
-     */
-    void addMoment(float moment);
+    float getMoment() const;
 
     /** get linear damping. */
     float getLinearDamping() const { return _linearDamping; }
@@ -531,7 +472,7 @@ public:
     Vec2 local2World(const Vec2& point);
 
     /** Get the rigid body of chipmunk. */
-    cpBody* getCPBody() const { return _cpBody; }
+    b2BodyId getB2Body() const { return _b2Body; }
 
     /** Set fixed update state */
     void setFixedUpdate(bool fixedUpdate) { _fixedUpdate = fixedUpdate; }
@@ -571,17 +512,17 @@ protected:
     void afterSimulation(const Mat4& parentToWorldTransform, float parentRotation);
 
 protected:
+
+    void deatchFromWOrld();
+
     std::vector<PhysicsJoint*> _joints;
-    Vector<PhysicsShape*> _shapes;
+    Vector<PhysicsCollider*> _colliders;
     PhysicsWorld* _world;
 
-    cpBody* _cpBody;
+    b2BodyId _b2Body;
     bool _dynamic;
     bool _rotationEnabled;
     bool _gravityEnabled;
-    bool _massDefault;
-    bool _momentDefault;
-    float _mass;
     float _area;
     float _density;
     float _moment;
@@ -593,15 +534,10 @@ protected:
 
     int _tag;
 
-    // when setMass() is invoked, it means body's mass is not calculated by shapes
-    bool _massSetByUser;
-    // when setMoment() is invoked, it means body's moment is not calculated by shapes
-    bool _momentSetByUser;
-
     Vec2 _positionOffset;
     float _rotationOffset;
     float _recordedRotation;
-    double _recordedAngle;
+    float _recordedAngle;
 
     // offset between owner's center point and down left point
     Vec3 _ownerCenterOffset;
@@ -617,7 +553,7 @@ protected:
     bool _fixedUpdate;
 
     friend class PhysicsWorld;
-    friend class PhysicsShape;
+    friend class PhysicsCollider;
     friend class PhysicsJoint;
 };
 
@@ -627,4 +563,3 @@ protected:
 }
 
 #endif  // defined(AX_ENABLE_PHYSICS)
-#endif  // __CCPHYSICS_BODY_H__

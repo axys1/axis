@@ -25,7 +25,6 @@
  ****************************************************************************/
 #include "physics/PhysicsContact.h"
 #if defined(AX_ENABLE_PHYSICS)
-#    include "chipmunk/chipmunk.h"
 
 #    include "physics/PhysicsBody.h"
 #    include "physics/PhysicsHelper.h"
@@ -56,7 +55,7 @@ PhysicsContact::~PhysicsContact()
     AX_SAFE_DELETE(_preContactData);
 }
 
-PhysicsContact* PhysicsContact::construct(PhysicsShape* a, PhysicsShape* b)
+PhysicsContact* PhysicsContact::construct(PhysicsCollider* a, PhysicsCollider* b)
 {
     PhysicsContact* contact = new PhysicsContact();
     if (contact->init(a, b))
@@ -68,7 +67,7 @@ PhysicsContact* PhysicsContact::construct(PhysicsShape* a, PhysicsShape* b)
     return nullptr;
 }
 
-bool PhysicsContact::init(PhysicsShape* a, PhysicsShape* b)
+bool PhysicsContact::init(PhysicsCollider* a, PhysicsCollider* b)
 {
     do
     {
@@ -90,17 +89,18 @@ void PhysicsContact::generateContactData()
         return;
     }
 
-    cpArbiter* arb = static_cast<cpArbiter*>(_contactInfo);
+    auto count = b2Body_GetContactCapacity(b2_nullBodyId); // FIXME
+    b2ContactData* arb = static_cast<b2ContactData*>(_contactInfo);
     AX_SAFE_DELETE(_preContactData);
     _preContactData     = _contactData;
     _contactData        = new PhysicsContactData();
-    _contactData->count = cpArbiterGetCount(arb);
+    _contactData->count = count;
     for (int i = 0; i < _contactData->count && i < PhysicsContactData::POINT_MAX; ++i)
     {
-        _contactData->points[i] = PhysicsHelper::cpv2vec2(cpArbiterGetPointA(arb, i));
+        _contactData->points[i] = PhysicsHelper::toVec2(arb->manifold.points[i].point);
     }
 
-    _contactData->normal = _contactData->count > 0 ? PhysicsHelper::cpv2vec2(cpArbiterGetNormal(arb)) : Vec2::ZERO;
+    _contactData->normal = _contactData->count > 0 ? PhysicsHelper::toVec2(arb->manifold.normal) : Vec2::ZERO;
 }
 
 // PhysicsContactPreSolve implementation
@@ -110,37 +110,45 @@ PhysicsContactPreSolve::~PhysicsContactPreSolve() {}
 
 float PhysicsContactPreSolve::getRestitution() const
 {
-    return cpArbiterGetRestitution(static_cast<cpArbiter*>(_contactInfo));
+    //return cpArbiterGetRestitution(static_cast<cpArbiter*>(_contactInfo));
+
+    return 0; // FIXME
 }
 
 float PhysicsContactPreSolve::getFriction() const
 {
-    return cpArbiterGetFriction(static_cast<cpArbiter*>(_contactInfo));
+    //return cpArbiterGetFriction(static_cast<cpArbiter*>(_contactInfo));
+    return 0; // FIXME
 }
 
 Vec2 PhysicsContactPreSolve::getSurfaceVelocity() const
 {
-    return PhysicsHelper::cpv2vec2(cpArbiterGetSurfaceVelocity(static_cast<cpArbiter*>(_contactInfo)));
+    //return PhysicsHelper::cpv2vec2(cpArbiterGetSurfaceVelocity(static_cast<cpArbiter*>(_contactInfo)));
+    return 0; // FIXME
 }
 
 void PhysicsContactPreSolve::setRestitution(float restitution)
 {
-    cpArbiterSetRestitution(static_cast<cpArbiter*>(_contactInfo), restitution);
+    // FIXME
+    //cpArbiterSetRestitution(static_cast<cpArbiter*>(_contactInfo), restitution);
 }
 
 void PhysicsContactPreSolve::setFriction(float friction)
 {
-    cpArbiterSetFriction(static_cast<cpArbiter*>(_contactInfo), friction);
+    // FIXME
+    //cpArbiterSetFriction(static_cast<cpArbiter*>(_contactInfo), friction);
 }
 
 void PhysicsContactPreSolve::setSurfaceVelocity(const Vec2& velocity)
 {
-    cpArbiterSetSurfaceVelocity(static_cast<cpArbiter*>(_contactInfo), PhysicsHelper::vec22cpv(velocity));
+    // FIXME
+    //cpArbiterSetSurfaceVelocity(static_cast<cpArbiter*>(_contactInfo), PhysicsHelper::vec22cpv(velocity));
 }
 
 void PhysicsContactPreSolve::ignore()
 {
-    cpArbiterIgnore(static_cast<cpArbiter*>(_contactInfo));
+    // FIXME
+    //cpArbiterIgnore(static_cast<cpArbiter*>(_contactInfo));
 }
 
 // PhysicsContactPostSolve implementation
@@ -150,17 +158,23 @@ PhysicsContactPostSolve::~PhysicsContactPostSolve() {}
 
 float PhysicsContactPostSolve::getRestitution() const
 {
-    return cpArbiterGetRestitution(static_cast<cpArbiter*>(_contactInfo));
+    // FIXME
+    //return cpArbiterGetRestitution(static_cast<cpArbiter*>(_contactInfo));
+    return 0;
 }
 
 float PhysicsContactPostSolve::getFriction() const
 {
-    return cpArbiterGetFriction(static_cast<cpArbiter*>(_contactInfo));
+    // FIXME
+    //return cpArbiterGetFriction(static_cast<cpArbiter*>(_contactInfo));
+    return 0;
 }
 
 Vec2 PhysicsContactPostSolve::getSurfaceVelocity() const
 {
-    return PhysicsHelper::cpv2vec2(cpArbiterGetSurfaceVelocity(static_cast<cpArbiter*>(_contactInfo)));
+    // FIXME
+    //return PhysicsHelper::cpv2vec2(cpArbiterGetSurfaceVelocity(static_cast<cpArbiter*>(_contactInfo)));
+    return Vec2::ZERO;
 }
 
 EventListenerPhysicsContact::EventListenerPhysicsContact()
@@ -251,7 +265,7 @@ EventListenerPhysicsContact* EventListenerPhysicsContact::create()
     return nullptr;
 }
 
-bool EventListenerPhysicsContact::hitTest(PhysicsShape* /*shapeA*/, PhysicsShape* /*shapeB*/)
+bool EventListenerPhysicsContact::hitTest(PhysicsCollider* /*shapeA*/, PhysicsCollider* /*shapeB*/)
 {
     return true;
 }
@@ -307,7 +321,7 @@ EventListenerPhysicsContactWithBodies::EventListenerPhysicsContactWithBodies() :
 
 EventListenerPhysicsContactWithBodies::~EventListenerPhysicsContactWithBodies() {}
 
-bool EventListenerPhysicsContactWithBodies::hitTest(PhysicsShape* shapeA, PhysicsShape* shapeB)
+bool EventListenerPhysicsContactWithBodies::hitTest(PhysicsCollider* shapeA, PhysicsCollider* shapeB)
 {
     if ((shapeA->getBody() == _a && shapeB->getBody() == _b) || (shapeA->getBody() == _b && shapeB->getBody() == _a))
     {
@@ -339,8 +353,8 @@ EventListenerPhysicsContactWithShapes::EventListenerPhysicsContactWithShapes() :
 
 EventListenerPhysicsContactWithShapes::~EventListenerPhysicsContactWithShapes() {}
 
-EventListenerPhysicsContactWithShapes* EventListenerPhysicsContactWithShapes::create(PhysicsShape* shapeA,
-                                                                                     PhysicsShape* shapeB)
+EventListenerPhysicsContactWithShapes* EventListenerPhysicsContactWithShapes::create(PhysicsCollider* shapeA,
+                                                                                     PhysicsCollider* shapeB)
 {
     EventListenerPhysicsContactWithShapes* obj = new EventListenerPhysicsContactWithShapes();
 
@@ -356,7 +370,7 @@ EventListenerPhysicsContactWithShapes* EventListenerPhysicsContactWithShapes::cr
     return nullptr;
 }
 
-bool EventListenerPhysicsContactWithShapes::hitTest(PhysicsShape* shapeA, PhysicsShape* shapeB)
+bool EventListenerPhysicsContactWithShapes::hitTest(PhysicsCollider* shapeA, PhysicsCollider* shapeB)
 {
     if ((shapeA == _a && shapeB == _b) || (shapeA == _b && shapeB == _a))
     {
@@ -384,7 +398,7 @@ EventListenerPhysicsContactWithShapes* EventListenerPhysicsContactWithShapes::cl
     return nullptr;
 }
 
-EventListenerPhysicsContactWithGroup::EventListenerPhysicsContactWithGroup() : _group(CP_NO_GROUP) {}
+EventListenerPhysicsContactWithGroup::EventListenerPhysicsContactWithGroup() : _group(0) {}
 
 EventListenerPhysicsContactWithGroup::~EventListenerPhysicsContactWithGroup() {}
 
@@ -403,7 +417,7 @@ EventListenerPhysicsContactWithGroup* EventListenerPhysicsContactWithGroup::crea
     return nullptr;
 }
 
-bool EventListenerPhysicsContactWithGroup::hitTest(PhysicsShape* shapeA, PhysicsShape* shapeB)
+bool EventListenerPhysicsContactWithGroup::hitTest(PhysicsCollider* shapeA, PhysicsCollider* shapeB)
 {
     if (shapeA->getGroup() == _group || shapeB->getGroup() == _group)
     {

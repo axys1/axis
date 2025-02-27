@@ -24,8 +24,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __CCPHYSICS_JOINT_H__
-#define __CCPHYSICS_JOINT_H__
+#pragma once
 
 #include <functional>
 
@@ -35,7 +34,7 @@
 #    include "base/Object.h"
 #    include "math/Math.h"
 
-struct cpConstraint;
+#    include "box2d/box2d.h"
 
 namespace ax
 {
@@ -119,10 +118,12 @@ protected:
 
     void flushDelayTasks();
 
+    void deatchFromBody();
+
     /** Create constraints for this type joint */
     virtual bool createConstraints() { return false; }
 
-    std::vector<cpConstraint*> _cpConstraints;
+    std::vector<b2JointId> _b2Joints;
     std::vector<DelayTask> _delayTasks;
     PhysicsBody* _bodyA;
     PhysicsBody* _bodyB;
@@ -603,7 +604,6 @@ protected:
 /** @} */
 /** @} */
 
-}
+}  // namespace ax
 
 #endif  // defined(AX_ENABLE_PHYSICS)
-#endif  // __CCPHYSICS_JOINT_H__

@@ -24,8 +24,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __CCPHYSICS_CONTACT_H__
-#define __CCPHYSICS_CONTACT_H__
+#pragma once
 
 #include "base/Config.h"
 #if defined(AX_ENABLE_PHYSICS)
@@ -39,7 +38,7 @@
 namespace ax
 {
 
-class PhysicsShape;
+class PhysicsCollider;
 class PhysicsBody;
 class PhysicsWorld;
 
@@ -79,10 +78,10 @@ public:
     };
 
     /** Get contact shape A. */
-    PhysicsShape* getShapeA() const { return _shapeA; }
+    PhysicsCollider* getShapeA() const { return _shapeA; }
 
     /** Get contact shape B. */
-    PhysicsShape* getShapeB() const { return _shapeB; }
+    PhysicsCollider* getShapeB() const { return _shapeB; }
 
     /** Get contact data. */
     const PhysicsContactData* getContactData() const { return _contactData; }
@@ -110,8 +109,8 @@ public:
     EventCode getEventCode() const { return _eventCode; };
 
 private:
-    static PhysicsContact* construct(PhysicsShape* a, PhysicsShape* b);
-    bool init(PhysicsShape* a, PhysicsShape* b);
+    static PhysicsContact* construct(PhysicsCollider* a, PhysicsCollider* b);
+    bool init(PhysicsCollider* a, PhysicsCollider* b);
 
     void setEventCode(EventCode eventCode) { _eventCode = eventCode; };
     bool isNotificationEnabled() const { return _notificationEnable; }
@@ -134,8 +133,8 @@ private:
 
 private:
     PhysicsWorld* _world;
-    PhysicsShape* _shapeA;
-    PhysicsShape* _shapeB;
+    PhysicsCollider* _shapeA;
+    PhysicsCollider* _shapeB;
     EventCode _eventCode;
     bool _notificationEnable;
     bool _result;
@@ -225,7 +224,7 @@ protected:
      * It will be call when two body have contact.
      * if return false, it will not invoke callbacks.
      */
-    virtual bool hitTest(PhysicsShape* shapeA, PhysicsShape* shapeB);
+    virtual bool hitTest(PhysicsCollider* shapeA, PhysicsCollider* shapeB);
 
 public:
     /**
@@ -268,7 +267,7 @@ public:
     /** Create the listener. */
     static EventListenerPhysicsContactWithBodies* create(PhysicsBody* bodyA, PhysicsBody* bodyB);
 
-    virtual bool hitTest(PhysicsShape* shapeA, PhysicsShape* shapeB) override;
+    virtual bool hitTest(PhysicsCollider* shapeA, PhysicsCollider* shapeB) override;
 
     virtual EventListenerPhysicsContactWithBodies* clone() override;
 
@@ -286,14 +285,14 @@ class AX_DLL EventListenerPhysicsContactWithShapes : public EventListenerPhysics
 {
 public:
     /** Create the listener. */
-    static EventListenerPhysicsContactWithShapes* create(PhysicsShape* shapeA, PhysicsShape* shapeB);
+    static EventListenerPhysicsContactWithShapes* create(PhysicsCollider* shapeA, PhysicsCollider* shapeB);
 
-    virtual bool hitTest(PhysicsShape* shapeA, PhysicsShape* shapeB) override;
+    virtual bool hitTest(PhysicsCollider* shapeA, PhysicsCollider* shapeB) override;
     virtual EventListenerPhysicsContactWithShapes* clone() override;
 
 protected:
-    PhysicsShape* _a;
-    PhysicsShape* _b;
+    PhysicsCollider* _a;
+    PhysicsCollider* _b;
 
 protected:
     EventListenerPhysicsContactWithShapes();
@@ -307,7 +306,7 @@ public:
     /** Create the listener. */
     static EventListenerPhysicsContactWithGroup* create(int group);
 
-    virtual bool hitTest(PhysicsShape* shapeA, PhysicsShape* shapeB) override;
+    virtual bool hitTest(PhysicsCollider* shapeA, PhysicsCollider* shapeB) override;
     virtual EventListenerPhysicsContactWithGroup* clone() override;
 
 protected:
@@ -324,4 +323,3 @@ protected:
 }
 
 #endif  // defined(AX_ENABLE_PHYSICS)
-#endif  //__CCPHYSICS_CONTACT_H__
