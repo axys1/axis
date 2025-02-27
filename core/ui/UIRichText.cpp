@@ -30,6 +30,7 @@
 #include <vector>
 #include <locale>
 #include <algorithm>
+#include <format>
 
 #include "platform/FileUtils.h"
 #include "platform/Application.h"
