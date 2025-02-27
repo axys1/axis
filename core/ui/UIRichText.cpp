@@ -30,7 +30,6 @@
 #include <vector>
 #include <locale>
 #include <algorithm>
-#include <format>
 
 #include "platform/FileUtils.h"
 #include "platform/Application.h"
@@ -43,6 +42,7 @@
 #include "ui/UIHelper.h"
 
 #include "fmt/compile.h"
+#include <fmt/format.h>
 
 #include "platform/SAXParser.h"
 
@@ -1688,12 +1688,12 @@ ax::Color3B RichText::color3BWithString(std::string_view color)
 
 std::string RichText::stringWithColor3B(const ax::Color3B& color3b)
 {
-    return std::format("#{:02x}{:02x}{:02x}", color3b.r, color3b.g, color3b.b);
+    return fmt::format("#{:02x}{:02x}{:02x}", color3b.r, color3b.g, color3b.b);
 }
 
 std::string RichText::stringWithColor4B(const ax::Color4B& color4b)
 {
-    return std::format("#{:02x}{:02x}{:02x}{:02x}", color4b.r, color4b.g, color4b.b, color4b.a);
+    return fmt::format("#{:02x}{:02x}{:02x}{:02x}", color4b.r, color4b.g, color4b.b, color4b.a);
 }
 
 void RichText::setTagDescription(std::string_view tag,
