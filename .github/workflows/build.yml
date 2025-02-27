@@ -16,6 +16,9 @@ on:
       - '**/*.md.in'
       - 'docs/**'
 
+env:
+  __1K_CXXSTD: '23'
+
 jobs:
   win32:
     runs-on: windows-latest
